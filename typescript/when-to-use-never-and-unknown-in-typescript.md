@@ -16,7 +16,7 @@ Typescript 对基本类型的设计执念于集合理论，此外，它还有并
 
 unknown 是某些值的集合，任何值都能冠以类型 unknown。这意味着 unknown 是一切类型的超级类型（supertype）。这就是为什么 unknown 被称为顶端类型。
 
-![Philadelphia's Magic Gardens. This place was so cool!]https://i1.wp.com/cdn-images-1.medium.com/max/1600/1*S0YZx_0dFeAvp2uB28MthA.png?zoom=2&resize=730%2C536&ssl=1 "Philadelphia's Magic Gardens")
+![Philadelphia's Magic Gardens. This place was so cool!](https://i1.wp.com/cdn-images-1.medium.com/max/1600/1*S0YZx_0dFeAvp2uB28MthA.png?zoom=2&resize=730%2C536&ssl=1 "Philadelphia's Magic Gardens")
 
 集合（或曰类型，可视作同义词） unknown 包含了一切其它集合。
 
@@ -31,6 +31,50 @@ T & unknown => T
 ```
 
 这可类比于，任何数加上 0 并不改变这个数，任何数乘以 1 亦如此。0 是可用加法来识别，而 1 则可以用乘法来识别。
+
+任何集合与空集合作并运算，并不对该集合有所改变，因此 never 可以 unions 运算识别；而交集运算是取两个集合的相同部分，但是 unknown 包含了一切，因此 unknown 可以 intersection 运算识别。
+
+因为只有类型 never 能够在类型 union 运算中得到识别，下面我们将看到它在一些情况下的不可或缺性。
+
+
+### never 用于那些永不可发生的情况
+
+我们来写一段代码，它用于发出一个网络请求，但是因为花费时间过久而失败。我们可以使用 Promise.race 来将这个持有网络请求返回值的 promise 和 另一个在给定时间之内就会被 reject 的 promise 合并起来。以下为第二个 promise 的构造函数：
+
+```
+function timeout(ms: number): Promise<never> {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error("Timeout!")), ms)
+  })
+}
+```
+
+注意返回值类型，因为这个 promise 决不会调用 resolve，我们可以使用任何类型作为返回值类型，这并无冲突。但是我们既然可以具体到类型 never，何不用之？
+
+现在来看看对超时的操作：
+
+```
+
+async function fetchPriceWithTimeout(tickerSymbol: string): Promise<number> {
+  const stock = await Promise.race([
+    fetchStock(tickerSymbol),
+    timeout(3000)
+  ])
+  return stock.price
+}
+
+```
+
+很完美！但是编译器如何推断 Promise.race 的返回值类型呢？race 取最先被 settled 的那个 promise，在这个例子中，Promise.race 的 签名应该像这样：
+
+```
+function race<A, B>(inputs: [Promise<A>, Promise<B>]): Promise<A | B>
+```
+
+
+
+
+
 
 
 
