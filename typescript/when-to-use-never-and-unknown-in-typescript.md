@@ -71,10 +71,28 @@ async function fetchPriceWithTimeout(tickerSymbol: string): Promise<number> {
 function race<A, B>(inputs: [Promise<A>, Promise<B>]): Promise<A | B>
 ```
 
+返回的promise所持有的值的类型是两个promise持有值类型的合集，上述例子中，fetchStock 和 timeout 为输入，因此它们的持有值的类型 A 为 { price: number }，而 B 为 never，因此，函数输出的 promise 所持类型为 { price: number } | never。 因为 never 是 unions 运算的识别因子，故返回值可简化为 { price: number }，这正是我们希望的。
 
+如何我们不使用 never 作为 timeout 的返回值类型，那么，我们不可能表达得如此干净利索。如果我们使用 any，那么我们将失去类型检查的好处，因为 { price: number } | any 和 any 等同。
 
+如果我们使用 unknown，那么 stock 的类型将会是 { price: number } | unknown，也就是 unknown。如此，我们就不能访问到属性 price，因为，price属性信息已经丢失。
 
+### 用 never 来简化条件类型 （conditional type）
 
+你会经常看到，never 被用于条件类型，以排除掉不需要的情况。举个例子吧，下面这些条件类型从函数的类型中抽离出参数和返回值的类型：
+
+```ts
+type Arguments<T> = T extends (...args: infer A) => any ? A : never
+type Return<T> = T extends (...args: any[]) => infer R ? R : never
+
+function time<F extends Function>(fn: F, ...args: Arguments<F>): Reurn<F> {
+  console.time()
+  const result = fn(...args)
+  console.timeEnd()
+  return result
+}
+```
+如 T 
 
 
 
