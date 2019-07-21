@@ -77,7 +77,7 @@ function race<A, B>(inputs: [Promise<A>, Promise<B>]): Promise<A | B>
 
 如果我们使用 unknown，那么 stock 的类型将会是 { price: number } | unknown，也就是 unknown。如此，我们就不能访问到属性 price，因为，price属性信息已经丢失。
 
-### 用 never 来简化条件类型 （conditional type）
+### 用 `never` 来收缩条件类型 （conditional type）
 
 你会经常看到，never 被用于条件类型，以排除掉不需要的情况。举个例子吧，下面这些条件类型从函数的类型中抽离出参数和返回值的类型：
 
@@ -92,7 +92,60 @@ function time<F extends Function>(fn: F, ...args: Arguments<F>): Reurn<F> {
   return result
 }
 ```
-如 T 
+如 T 是函数类型，则编译器推断其参数类型和返回值类型。但如果 T 不是函数类型，那么 Argument<T> 和 Return<T> 返回者便无以感知。这里，我们使用的是 never 约束，如此，我们可得编译时 error：
+
+```ts
+// Error: Type '3' is not assignable to type 'never'
+
+const x: Return<"not a function type"> = 3
+```
+
+对于精准化（narrowing）联合类型（union type），条件类型堪为可用。在 TS 库中，NonNullable<T> 类型即是例证，它将 null 和 undefined 类型从 T 中排除。其定义大概如此：
+
+```ts
+type NonNullable<T> = T extends null | undefined ? never : T
+```
+条件类型能对联合类型作分布处理，此所以上述代码可行。类似形为 T extends U ? X : Y  类型者，T 代表一未知集合，施以条件，则可对组成 T 的子集以此二元运算，然后将结果合并，以得结果。
+
+```ts
+// if T = A | B
+T extends U ? X : T == (A extends U ? X : A) | (B extends U ? X : B)
+```
+
+可以看到，在每一个分支里，子集都按照二元运算或替换以新的类型、或维持原类型。
+
+因而，类型 NonNullable<string | null> 可按照如下几步解析：
+
+```ts
+type NullOrUndefined = null | undefined
+type NonNullable<string | null> 
+  // The conditional distributes over each branch in `string | null`
+  == (string extends NullOrUndefined ? never : string) | (null extends  NullOrUndefined ? never : null)
+  // The conditional in each union branch is resolved
+  == string | never
+  // `never` factors out of the resulting union type
+  == string
+```
+结果为，对于给定的集合（类型） T ，NonNullable<T> 生成一个更小的集合，这里使用 never 将无需的类型排除掉。
+
+### 使用 `unknown` 代表万物
+
+任何值都能冠以 unknown 类型，因此，任何集合包含于 unknown 中。在不便更明确地指定类型时，可使用之。举个例子，pretty-printing 函数能接收一切类型的值：
+
+```ts
+function prettyPrint(x: unknown): string {
+  if (Array.isArray(x)) {
+    return "["+ x.map(prettyPrint).join(", ") +"]"
+  }
+  if (typeof x === "string") {
+    return `"${x}"`
+  }
+  if (typeof x === "number") {
+    return String(x)
+  }
+  return "etc."
+}
+```
 
 
 
