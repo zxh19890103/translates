@@ -24,7 +24,7 @@ never 是一个空集合，任何值都不能冠以类型 never。实际上，�
 
 底端和顶端集合可分别借助操作符 union（|） 和 intersection（&）来识别，比如，给定类型 T，则：
 
-```
+```ts
 T | never => T
 T & unknown => T
 ```
@@ -40,7 +40,7 @@ T & unknown => T
 
 我们来写一段代码，它用于发出一个网络请求，但是因为花费时间过久而失败。我们可以使用 Promise.race 来将这个持有网络请求返回值的 promise 和另一个在给定时间之内就会被 reject 的 promise 合并起来。以下为第二个 promise 的构造函数：
 
-```
+```ts
 function timeout(ms: number): Promise<never> {
   return new Promise((_, reject) => {
     setTimeout(() => reject(new Error("Timeout!")), ms)
@@ -52,7 +52,7 @@ function timeout(ms: number): Promise<never> {
 
 现在来看看对超时的操作：
 
-```
+```ts
 
 async function fetchPriceWithTimeout(tickerSymbol: string): Promise<number> {
   const stock = await Promise.race([
@@ -66,7 +66,7 @@ async function fetchPriceWithTimeout(tickerSymbol: string): Promise<number> {
 
 很完美！但是编译器如何推断 Promise.race 的返回值类型呢？race 取最先被 settled 的那个 promise，在这个例子中，Promise.race 的 签名应该像这样：
 
-```
+```ts
 function race<A, B>(inputs: [Promise<A>, Promise<B>]): Promise<A | B>
 ```
 
