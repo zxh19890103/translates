@@ -1,18 +1,18 @@
-## TS中何时使用“never”与“unknown”类型
+## TS 中何时使用“never”与“unknown”类型
 
 ![Philadelphia's Magic Gardens. This place was so cool!](https://i2.wp.com/cdn-images-1.medium.com/max/1600/1*_wh7P-jdH2o9xHgFi1bqbw.png?resize=1818%2C1090&ssl=1 "Philadelphia's Magic Gardens")
 
-TypeScript 在版本2.0和3.0分别引入了 “never” 和 “unknown” 两个原始类型。这体现了类型理论的基础性和全面性。TypeScript 严格遵循了这个原则而得以设计；但同时，它也是一门实用主义语言，它引入的每一个特性都有其实际用途，这包括 never 和 unknown。欲理解这些特性的用法，我们需要首先问“究竟什么是类型？”。
+TypeScript 在版本 2.0 和 3.0 分别引入了 “never” 和 “unknown” 两个基本类型。这完善了 TS 类型系统的基础性和全面性。TypeScript 严格遵循了类型设计原则；同时，它也是一门实用主义语言，它引入的每一个特性都有其实际用途，这包括 never 和 unknown。欲准确理解这些特性的用法，我们首先要问“究竟什么是类型？”。
 
 ### 以集合理论作解
 
-当你深入去思考一下何为“类型”，你会发现，所谓之“类型”，乃不过为可能取得值之集合。举个例子，Typescript 中， 类型 string 乃全部字符串的集合。类型 date 乃全部 Date 实例的集合，而类型 Iterable<T> 乃全部实现了接口 Iterable 并对迭代项目约束以指定类型 T 的的对象。
-  
+当你深入去思考一下何为“类型”，你会发现，所谓之“类型”，乃不过为可能取得值之集合。举个例子，Typescript 中， 类型 string 乃全部字符串的集合。类型 Date 乃全部 Date 实例的集合，而类型 Iterable<T\> 乃全部实现了接口 Iterable 并对迭代项目约束以指定类型 T 的的对象。
+
 Typescript 对基本类型的设计执念于集合理论，此外，它还有并集（union）和 交集（intersection）等高级类型。类型 string | number 就是一个 “union” 类型，因为它表达的是全部字符串的集合与全部数值集合的合并。
 
 ![Philadelphia's Magic Gardens. This place was so cool!](https://i0.wp.com/cdn-images-1.medium.com/max/1600/1*ZUSJpOOStqTRvCZ8GucxSw.png?zoom=2&resize=730%2C436&ssl=1 "Philadelphia's Magic Gardens")
 
-因为 string | number 包含了全部的 string 和 全部的number，故它是类型 string 和 number 的超级类型（supertype）。
+因为 string | number 包含了全部的 string 和 全部的 number，故它是类型 string 和 number 的超级类型（supertype）。
 
 unknown 是某些值的集合，任何值都能冠以类型 unknown。这意味着 unknown 是一切类型的超级类型（supertype）。这就是为什么 unknown 被称为顶端类型。
 
@@ -20,10 +20,9 @@ unknown 是某些值的集合，任何值都能冠以类型 unknown。这意味�
 
 集合（或曰类型，可视作同义词） unknown 包含了一切其它集合。
 
-never 是一个空集合，任何值都不能冠以类型 never。实际上，如何你将某个值解析为 never，系统将提出抗议，因为这么做存在矛盾之处。空集合可包含于任何非空集合，因此 never 是一切其它非空类型的子集合。这就是为什么 never 被称为底端集合。
+never 是一个空集合，任何值都不能冠以类型 never。实际上，如果你将某个值的类型解析为 never，系统将提出抗议，因为这么做存在矛盾之处。空集合可包含于任何非空集合，因此 never 是一切其它非空类型的子集合。这就是为什么 never 被称为底端集合。
 
-底端和顶端集合可分别借助操作符 union（|） 和 intersection（&）来识别，比如，给定类型 T，则
-unknown 是某些值的集合，任何值都能冠以类型 unknown。这意味着 unknown 是一切类型的超级类型（supertype）。这就是为什么 unknown 被称为顶端类型。：
+底端和顶端集合可分别借助操作符 union（|） 和 intersection（&）来识别，比如，给定类型 T，则：
 
 ```
 T | never => T
@@ -39,7 +38,7 @@ T & unknown => T
 
 ### never 用于那些永不可发生的情况
 
-我们来写一段代码，它用于发出一个网络请求，但是因为花费时间过久而失败。我们可以使用 Promise.race 来将这个持有网络请求返回值的 promise 和 另一个在给定时间之内就会被 reject 的 promise 合并起来。以下为第二个 promise 的构造函数：
+我们来写一段代码，它用于发出一个网络请求，但是因为花费时间过久而失败。我们可以使用 Promise.race 来将这个持有网络请求返回值的 promise 和另一个在给定时间之内就会被 reject 的 promise 合并起来。以下为第二个 promise 的构造函数：
 
 ```
 function timeout(ms: number): Promise<never> {
@@ -49,7 +48,7 @@ function timeout(ms: number): Promise<never> {
 }
 ```
 
-注意返回值类型，因为这个 promise 决不会调用 resolve，我们可以使用任何类型作为返回值类型，这并无冲突。但是我们既然可以具体到类型 never，何不用之？
+注意返回值 promise 的解析值类型，因为这个 promise 决不会调用 resolve，我们可以使用 any 作为其类型，这并无冲突。但是我们既然可以具体到类型 never，何不用之？
 
 现在来看看对超时的操作：
 
@@ -71,15 +70,15 @@ async function fetchPriceWithTimeout(tickerSymbol: string): Promise<number> {
 function race<A, B>(inputs: [Promise<A>, Promise<B>]): Promise<A | B>
 ```
 
-返回的promise所持有的值的类型是两个promise持有值类型的合集，上述例子中，fetchStock 和 timeout 为输入，因此它们的持有值的类型 A 为 { price: number }，而 B 为 never，因此，函数输出的 promise 所持类型为 { price: number } | never。 因为 never 是 unions 运算的识别因子，故返回值可简化为 { price: number }，这正是我们希望的。
+返回的 promise 所解析值的类型是两个 promise 解析值类型的合集，上述例子中，fetchStock 和 timeout 为输入，因此它们的解析值的类型 A 为 { price: number }，而 B 为 never，因此，函数输出的 promise 解析值类型为 { price: number } | never。 因为 never 是 unions 运算的识别因子，故返回值可简化为 { price: number }，这正是我们希望的。
 
-如何我们不使用 never 作为 timeout 的返回值类型，那么，我们不可能表达得如此干净利索。如果我们使用 any，那么我们将失去类型检查的好处，因为 { price: number } | any 和 any 等同。
+如果我们不使用 never 作为 timeout 的返回值类型，那么，我们不可能表达得如此干净利索。如果我们使用 any，那么我们将失去类型检查的好处，因为 { price: number } | any 和 any 等同。
 
-如果我们使用 unknown，那么 stock 的类型将会是 { price: number } | unknown，也就是 unknown。如此，我们就不能访问到属性 price，因为，price属性信息已经丢失。
+如果我们使用 unknown，那么 stock 的类型将会是 { price: number } | unknown，也就是 unknown。如此，我们就不能访问到属性 price，因为，price 属性信息已经丢失。
 
-### 用 `never` 来收缩条件类型 （conditional type）
+### 用 `never` 来收敛条件类型 （conditional type）
 
-你会经常看到，never 被用于条件类型，以排除掉不需要的情况。举个例子吧，下面这些条件类型从函数的类型中抽离出参数和返回值的类型：
+你会经常看到，never 被用于条件类型，以排除掉不需要的情况。举个例子吧，下面这些条件类型从函数的类型定义中抽离出参数和返回值的类型：
 
 ```ts
 type Arguments<T> = T extends (...args: infer A) => any ? A : never
@@ -92,7 +91,7 @@ function time<F extends Function>(fn: F, ...args: Arguments<F>): Reurn<F> {
   return result
 }
 ```
-如 T 是函数类型，则编译器推断其参数类型和返回值类型。但如果 T 不是函数类型，那么 Argument<T> 和 Return<T> 返回者便无以感知。这里，我们使用的是 never 约束，如此，我们可得编译时 error：
+如 T 是函数类型，则编译器推断其参数类型和返回值类型。但如果 T 不是函数类型，那么 Argument<T> 和 Return<T> 返回者便无以感知。这里，我们使用的是 never 来约束，如此，我们可得编译时 error：
 
 ```ts
 // Error: Type '3' is not assignable to type 'never'
@@ -100,7 +99,7 @@ function time<F extends Function>(fn: F, ...args: Arguments<F>): Reurn<F> {
 const x: Return<"not a function type"> = 3
 ```
 
-对于精准化（narrowing）联合类型（union type），条件类型堪为可用。在 TS 库中，NonNullable<T> 类型即是例证，它将 null 和 undefined 类型从 T 中排除。其定义大概如此：
+对于收敛（narrowing）联合类型（union type），条件类型堪为可用。在 TS 库中，NonNullable<T> 类型即是例证，它将 null 和 undefined 类型从 T 中排除。其定义大概如此：
 
 ```ts
 type NonNullable<T> = T extends null | undefined ? never : T
@@ -114,7 +113,7 @@ T extends U ? X : T == (A extends U ? X : A) | (B extends U ? X : B)
 
 可以看到，在每一个分支里，子集都按照二元运算或替换以新的类型、或维持原类型。
 
-因而，类型 NonNullable<string | null> 可按照如下几步解析：
+因而，类型 NonNullable<string | null\> 可按照如下几步解析：
 
 ```ts
 type NullOrUndefined = null | undefined
@@ -149,7 +148,7 @@ function prettyPrint(x: unknown): string {
 
 直接使用 unknown 没什么意义，但是你可借助“类型守卫”在块级作用域内收敛类型，并由此获得准确的类型检查。
 
-TS 3.0 之前，定义 prettyPrint 函数参数 x 类型为 any 极为可取。类型收敛如 unknown 一样，可用于 any。在将 x 的类型收敛于 Array 类型的块级域中，类型检查允许我们访问到 x 的 map 和 join 方法。我们使用 unknown 类型好处之一就是类型检查会对任何成员访问假以错误提醒，而 any 无此提醒。
+TS 3.0 之前，定义 prettyPrint 函数参数 x 类型为 any 极为可取。类型收敛如 unknown 一样，可用于 any。在将 x 的类型收敛于 Array 类型的块级域中，类型检查允许我们访问到 x 的 map 和 join 方法。我们使用 unknown 类型好处之一就是类型检查会对任何成员访问施以错误提醒，而 any 无此提醒。
 
 ```ts
 import isArray from  'isarray'
@@ -161,7 +160,7 @@ function prettyPrint(x: any): string {
   return "ect."
 }
 ```
- 包 isarray 无类型定义，故而无法使函数 isArray 为[类型守卫](http://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards)。但我们很可能使用了 isarray 而未能发现问题，为什么呢？因为，isArray 非类型守卫，而我们将 x 限制于类型 any，因而在 if 块级域内，x 仍为 any。这导致TS编译器在此无法捕获到 x 的类型，而如果我们将 x 限制以 unknown 情况将有所不同：
+ 包 isarray 无类型定义，故而无法使函数 isArray 为[类型守卫](http://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards)。但我们很可能使用了 isarray 而未能发现问题，为什么呢？因为，isArray 非类型守卫，而我们将 x 限制于类型 any，因而在 if 块级域内，x 仍为 any。这导致 TS 编译器在此无法捕获到 x 的类型，而如果我们将 x 限制以 unknown 情况将有所不同：
 
 _<span style="color: #888">Object is of type “unknown”</span>_
 
