@@ -12,6 +12,17 @@ interface H {
     age: number
 }
 
+const age = {
+    age: 90,
+    name: "s"
+}
+
+type R = typeof age
+
+"is H contains R?"
+
+let y: R
+
 interface J extends H {
     name: string
 }
