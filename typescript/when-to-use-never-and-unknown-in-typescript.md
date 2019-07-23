@@ -147,5 +147,35 @@ function prettyPrint(x: unknown): string {
 }
 ```
 
+直接使用 unknown 没什么意义，但是你可借助“类型守卫”在块级作用域内收敛类型，并由此获得准确的类型检查。
+
+TS 3.0 之前，定义 prettyPrint 函数参数 x 类型为 any 极为可取。类型收敛如 unknown 一样，可用于 any。在将 x 的类型收敛于 Array 类型的块级域中，类型检查允许我们访问到 x 的 map 和 join 方法。我们使用 unknown 类型好处之一就是类型检查会对任何成员访问假以错误提醒，而 any 无此提醒。
+
+```ts
+import isArray from  'isarray'
+
+function prettyPrint(x: any): string {
+  if (isArray(x)) { // isArray 非类型守卫
+    return "[" + x.map(prettyPrint).join(", ")
+  }
+  return "ect."
+}
+```
+ 包 isarray 无类型定义，故而无法使函数 isArray 为[类型守卫](http://www.typescriptlang.org/docs/handbook/advanced-types.html#user-defined-type-guards)。但我们很可能使用了 isarray 而未能发现问题，为什么呢？因为，isArray 非类型守卫，而我们将 x 限制于类型 any，因而在 if 块级域内，x 仍为 any。这导致TS编译器在此无法捕获到 x 的类型，而如果我们将 x 限制以 unknown 情况将有所不同：
+
+_<span style="color: #888">Object is of type “unknown”</span>_
+
+使用 unknown 更加安全！
+
+### 如何在 never、unknown、any 之间作出选择
+
+prettyPrint 函数的参数类型与上述函数 timeout 所返回promise 的解析值的类型都可冠以 any。不同之处是，timeout 的 promise 的解析值不是任意的，因为它根本不可能解析出任何值。
+
+- 在那些将或既不能取得任何值的地方，使用 never
+- 在那些将或既取得任意值，但不知类型的地方，请使用 unknown
+- 除非你有意忽略类型检查，不要使用 any
+
+总之，你应该尽量使用具体的类型。never 是最具体的类型，因为没有哪个集合比空集合更小了；而 unknown 是最弱的类型，因为它包含了全部可能的值。any 则不为集合，它破坏了类型检查。因为请尽量不要使用 any。
+
 
 
