@@ -6,7 +6,7 @@ TypeScript 在版本 2.0 和 3.0 分别引入了 “never” 和 “unknown” �
 
 ### 以集合理论作解
 
-当你深入去思考一下何为“类型”，你会发现，所谓之“类型”，乃不过为可能取得值之集合。举个例子，Typescript 中， 类型 string 乃全部字符串的集合。类型 Date 乃全部 Date 实例的集合，而类型 Iterable<T\> 乃全部实现了接口 Iterable 并对迭代项目约束以指定类型 T 的的对象。
+当你深入去思考一下何为“类型”，你会发现，所谓之“类型”，乃不过为可能取得值之集合。举个例子，Typescript 中， 类型 string 乃全部字符串的集合。类型 Date 乃全部 Date 实例的集合，而类型 Iterable<T\> 乃全部实现了接口 Iterable 并对迭代项目约束以指定类型 T 的对象的集合。
 
 Typescript 对基本类型的设计执念于集合理论，此外，它还有并集（union）和 交集（intersection）等高级类型。类型 string | number 就是一个 “union” 类型，因为它表达的是全部字符串的集合与全部数值集合的合并。
 
