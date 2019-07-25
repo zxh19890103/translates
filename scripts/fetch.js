@@ -13,10 +13,9 @@ https.get(url, {
     })
     res.on("end", () => {       
         const filepath = path.resolve(__dirname, "../fishes/when-to-use-never-and-unknown-in-typescript.html")
-        // const ws = fs.createWriteStream(filepath)        
+        const ws = fs.createWriteStream(filepath)
         const str = buffer.toString("uft8")
-        const want = /<article\>/.exec(str)
-        console.log(want[0])
-        // ws.write()
+        const want = /<article([\s\S]+)<\/article>/.exec(str)
+        ws.write(want && want[1])
     })
 })
