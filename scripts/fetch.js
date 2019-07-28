@@ -2,20 +2,24 @@ const path = require("path")
 const https = require("https")
 const fs = require("fs")
 
-const url = "https://github.com/zxh19890103/translates/blob/master/typescript/when-to-use-never-and-unknown-in-typescript.md"
-https.get(url, {
+const pathname = "typescript/when-to-use-never-and-unknown-in-typescript.md"
+
+const baseUrl = "https://github.com/zxh19890103/translates/blob/master/"
+
+https.get(`${baseUrl}${pathname}`, {
 }, (res) => {
     let k = 0
     let buffer = Buffer.alloc(0)
     res.on("data", (d) => {
-        buffer += d
-        console.log(k ++)
+        buffer = Buffer.concat([buffer, d])
+        console.log(k ++, "chunk")
     })
-    res.on("end", () => {       
-        const filepath = path.resolve(__dirname, "../fishes/when-to-use-never-and-unknown-in-typescript.html")
-        const ws = fs.createWriteStream(filepath)
-        const str = buffer.toString("uft8")
-        const want = /<article([\s\S]+)<\/article>/.exec(str)
-        ws.write(want && want[1])
+    res.on("end", () => {
+        const savepath = path.resolve(__dirname, `../fishes/${pathname}`)
+        const ws = fs.createWriteStream(savepath)
+        const str = buffer.toString("utf8")
+        const matches = /<article.+?>([\s\S]+)<\/article>/.exec(str)
+        const html = matches[1]
+        ws.write(html.replace(/<svg.+?>.+?<\/svg>/g, "").replace(/<h2.+?>.+?<\/h2>/g, ""))
     })
 })
