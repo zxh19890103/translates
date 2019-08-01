@@ -2,7 +2,8 @@ const path = require("path")
 const https = require("https")
 const fs = require("fs")
 
-const pathname = "typescript/when-to-use-never-and-unknown-in-typescript.md"
+// const pathname = "typescript/when-to-use-never-and-unknown-in-typescript.md"
+const pathname = "talks/we-programmers.md"
 
 const baseUrl = "https://github.com/zxh19890103/translates/blob/master/"
 
