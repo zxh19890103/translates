@@ -3,11 +3,13 @@ const https = require("https")
 const fs = require("fs")
 
 // const pathname = "typescript/when-to-use-never-and-unknown-in-typescript.md"
-const pathname = "talks/we-programmers.md"
+// const pathname = "talks/we-programmers.md"
+// const pathname = "talks/the-programmer's-oath.md"
+const pathname = "talks/how-does-the-development-mode-work.md"
 
-const baseUrl = "https://github.com/zxh19890103/translates/blob/master/"
+// const baseUrl = "https://github.com/zxh19890103/translates/blob/master/"
 
-https.get(`${baseUrl}${pathname}`, {
+https.get(`https://github.com/zxh19890103/overreacted.io/blob/master/src/pages/how-does-the-development-mode-work/index.zh-hans.md`, {
 }, (res) => {
     let k = 0
     let buffer = Buffer.alloc(0)
